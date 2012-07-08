@@ -18,7 +18,7 @@ from django.db.models import Q
 
 def generate_label():
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    
+
     seed = random.randint(0, int(time.mktime(datetime.now().timetuple())))
     m = hashlib.md5()
     m.update(str(seed))
@@ -52,7 +52,7 @@ def require_login(func):
     return _
 
 def create_context(request, **kwargs):
-    context = { 
+    context = {
         'system_name': settings.SYSTEM_NAME,
     }
 
@@ -124,7 +124,9 @@ def order(request, label):
 
     # 菜单
     dish_data = defaultdict(list)
-    dishes = Dish.objects.select_related('category').filter(category__vendor=order.vendor_id)
+    dishes = Dish.objects.select_related('category').filter(category__vendor=order.vendor_id, \
+                                                            category__is_frozen=False)
+    #dishes = Dish.objects.select_related('category').filter(category__vendor=order.vendor_id)
     for dish in dishes:
         dish_data[dish.category.name].append(dish)
 
@@ -153,7 +155,7 @@ def order_content(self, label):
         d = {}
         for order_item in order_items:
             d.setdefault(order_item.user.nickname, {
-                'total_price': 0, 
+                'total_price': 0,
                 'user_id': order_item.user.id,
                 'nickname': order_item.user.nickname,
                 'home_url': order_item.user.home_url,
@@ -168,7 +170,7 @@ def order_content(self, label):
         for v in d.values():
             v['items'].sort(key=lambda x:(x['dish_name'], x['props']))
             v['total_price'] = sum(item['price'] for item in v['items'])
-        
+
         order_content = {
             'total_users': len(d),
             'total_price': sum(v['total_price'] for v in d.values()),
@@ -213,7 +215,7 @@ def authenticated(request):
                 user.avatar_url = link['@href']
             elif link['@rel'] == 'alternate':
                 user.home_url = link['@href']
-        
+
         user.save()
 
     redir = request.COOKIES.get('redir', '')
@@ -268,7 +270,7 @@ def create_order(request):
             vendor = Vendor.objects.get(id=vendor_id)
             order = Order(creator=user, label=label, vendor=vendor, create_time=datetime.now(), deadline=deadline, finished='n', item_limit=item_limit)
             order.save()
-                
+
             return HttpResponseRedirect('/o%s/' % order.label)
 
         except Vendor.DoesNotExist:
@@ -286,8 +288,8 @@ def create_order(request):
 
     if deadline_hour >= 24:
         deadline_hour -= 24
-        
-    context = create_context(request, 
+
+    context = create_context(request,
         vendors=vendors,
         deadline_minute=deadline_minute,
         deadline_hour=deadline_hour,
@@ -349,7 +351,7 @@ def delete(request, label):
         if not result:
             order_item.delete()
             result = {"result": "ok"}
-            
+
         return HttpResponse(json.dumps(result))
     except (Order.DoesNotExist, OrderItem.DoesNotExist):
         return HttpResponseNotFound('Not Found')
@@ -372,7 +374,7 @@ def show_vendor(request, id):
     try:
         vendor = Vendor.objects.get(id=id)
         context = create_context(request, vendor=vendor)
-        return render_to_response('home/show_vendor.html', context) 
+        return render_to_response('home/show_vendor.html', context)
     except Vendor.DoesNotExist:
         return HttpResponseNotFound('Not Found')
 
@@ -436,12 +438,12 @@ def add_review(request, cat, subject_id):
 def rate(request, dish_id):
     rating_value = request.POST.get('rating', '')
     comment = request.POST.get('comment', '')
-    
+
     try:
         dish = Dish.objects.get(id=dish_id)
     except Dish.DoesNotExist:
         return HttpResponseNotFound('Not Found')
-        
+
     if rating_value.isdigit() and int(rating_value) > 0 and int(rating_value) <= 10:
         rating_value = int(rating_value)
 
@@ -468,7 +470,7 @@ def rate(request, dish_id):
         result = { 'result': 'error' }
 
     return HttpResponse(json.dumps(result))
-    
+
 
 @require_login
 def detail_by_dish(request, dish_id):

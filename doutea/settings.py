@@ -2,8 +2,12 @@
 # Django settings for doutea project.
 
 import os.path
-DEBUG = True
-DEBUG_KEY = True
+
+DEBUG = False
+DEBUG_KEY = False
+
+
+
 TEMPLATE_DEBUG = DEBUG
 
 SYSTEM_NAME = u'豆娘订购系统'
@@ -18,7 +22,7 @@ PROJECT_ROOT = os.path.dirname(__file__)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'test_torpedoallen_doutea',                      # Or path to database file if using sqlite3.
+        'NAME': 'doutea',                      # Or path to database file if using sqlite3.
         'USER': 'root',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -32,13 +36,6 @@ APIKEY = {
         'apikey': '0963b4d662b5392f1c2b1e83281fab8d',
         'secret': '10777d902e656c68',
         'callback': 'http://localhost:9599/authenticated',
-    },
-
-    'douban': {
-        'type': 'oauth2',
-        'apikey': '0345107ca74544f409cf3175f5cfcedc',
-        'secret': '6f22259925ab22c6',
-        'callback': 'http://doutea.dapps.douban.com/authenticated',
     },
 }
 
@@ -168,3 +165,9 @@ LOGGING = {
         },
     }
 }
+
+
+try:
+    from local_settings import *
+except ImportError:
+    pass

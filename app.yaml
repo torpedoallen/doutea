@@ -4,6 +4,7 @@ runtime: python
 api_version: 1
 irc_report_channel: doutea
 report_observer_emails: torpedoallen@douban.com
+release_managers: torpedoallen
 
 handlers:
 - url: /.*

@@ -1,3 +1,7 @@
+<%!
+from home.utils import beautify_price
+%>
+
 <%inherit file="base.html" />
 
 <%def name="more_header()">
@@ -21,6 +25,7 @@ $(document).ready(function() {
         } else {
             $(".order_content").css({ position: '' });
         }
+        $(".order_content").css({"height":$(window).height(), "overflow":"auto"});
     });
     
     
@@ -256,7 +261,7 @@ $(document).ready(function() {
     % endfor
 </td>
 
-<td align="right">&yen; ${dish.price}</td>
+<td align="right">&yen; ${beautify_price(dish.price)}</td>
 <td><input type="button" class="btn-r place_order" value="订这个" /></td>
 </tr>
 % endfor
@@ -271,7 +276,7 @@ $(document).ready(function() {
 <div class="order_stat">
 <%
 %>
-<h2>订单统计(共${order_stat['total_items']}份，${order_stat['total_price']}元)</h2>
+<h2>订单统计(共${order_stat['total_items']}份，${beautify_price(order_stat['total_price'])}元)</h2>
 <table class="order_stat">
 % for k in sorted(order_stat['items'].keys()):
 <% v = order_stat['items'][k] %>

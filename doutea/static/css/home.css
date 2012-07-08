@@ -123,32 +123,40 @@ table {
     width: 258px;
     height: 68px;
     float: left;
-    border: solid 1px #f1efec;
     padding: 20px;
+    margin: 5px;
 }
 
 .block.clickable {
     cursor: pointer;
 }
 
-.block.clickable.selected {
-    background: #f3f3f3;
-    border: solid 1px #fb8;
+.block.clickable.hovered, .block.clickable.selected {
+    text-shadow: 0 -1px 0 #007BA1;
+    text-decoration: none;
+    background-color: #65b57e;
+    color: #fff;
+    -webkit-box-shadow: 0 0 7px #80cbae;
+    -moz-box-shadow: 0 0 7px #80cbae;
 }
 
-.block.clickable.hovered {
-    background: #f3f3f3;
+.block.clickable.selected .blocktitle, .block.clickable.selected .blockinfo,
+.block.clickable.hovered .blocktitle, .block.clickable.hovered .blockinfo {
+    color: #fff;
 }
 
 .blocktitle {
-    font-size: 14px;
-    color: #000;
+    font-family: 'Helvetica Neue', '微软雅黑', Arial, sans-serif;
+    font-size: 16px;
+    color: #007BA1;
     margin-bottom: 8px;
+    word-wrap:break-word;
 }
 
 .blockinfo {
     font-size: 12px;
     color: #888;
+    word-wrap:break-word;
 }
 
 .blockstatus {

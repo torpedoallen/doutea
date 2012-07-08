@@ -39,6 +39,7 @@ class Category(models.Model):
     prop2 = models.CharField(max_length=255, blank=True)        # 默认属性2
     prop3 = models.CharField(max_length=255, blank=True)        # 默认属性3
     prop4 = models.CharField(max_length=255, blank=True)        # 默认属性4
+    is_frozen = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -49,13 +50,13 @@ class Category(models.Model):
 class Dish(models.Model):
     name = models.CharField(max_length=100)         # 菜品名称
     category = models.ForeignKey(Category)          # 分类id
-    price = models.IntegerField()                   # 价格
+    price = models.DecimalField(max_digits=12, decimal_places=2)                   # 价格
     memo = models.CharField(max_length=255, blank=True)         # 备注
     prop1 = models.CharField(max_length=255, blank=True)        # 属性1
     prop2 = models.CharField(max_length=255, blank=True)        # 属性2
     prop3 = models.CharField(max_length=255, blank=True)        # 属性3
     prop4 = models.CharField(max_length=255, blank=True)        # 属性4
-    rating = models.IntegerField()                  # 评分，1-10
+    rating = models.IntegerField(default=0)                  # 评分，1-10
     rating_count = models.IntegerField(default=0)            # 评分的人数
 
     def __unicode__(self):
@@ -85,7 +86,7 @@ class Order(models.Model):
     creator = models.ForeignKey(User)
     create_time = models.DateTimeField()
     deadline = models.DateTimeField()
-    item_limit = models.IntegerField()              # 订单的数量限制
+    item_limit = models.IntegerField(default=100)              # 订单的数量限制
     finished = models.CharField(max_length=1)
 
 class OrderItem(models.Model):
@@ -109,7 +110,7 @@ class Review(models.Model):
     update_time = models.DateTimeField()            # 发表/更新时间
     content = models.TextField()                    # 内容
 
-    
+
 class Rating(models.Model):
     user = models.ForeignKey(User)
     dish_id = models.IntegerField()

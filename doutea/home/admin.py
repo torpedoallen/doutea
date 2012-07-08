@@ -13,7 +13,8 @@ class DishInline(admin.TabularInline):
     model = Dish
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'dish_name', 'memo', 'prop1', 'prop2', 'prop3', 'prop4')
+    list_display = ('id', 'name', 'dish_name', 'memo', 'prop2', 'prop2', 'prop3', 'prop4', 'is_frozen')
+    #list_display = ('id', 'name', 'dish_name', 'memo', 'prop1', 'prop2', 'prop3', 'prop4')
     list_display_links = ('name',)
     inlines = [ DishInline, ]
 

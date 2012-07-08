@@ -2,3 +2,6 @@ venv
 permdir
 *.py[c|o]
 dev.yaml
+.gitignore
+*.swp
+doutea/local_settings.py
