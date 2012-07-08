@@ -1,0 +1,39 @@
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-size: 12px;
+    font-family: Arial,Helvetica,sans-serif;
+}
+
+h1 {
+    font-size: 18px;
+    color: #060;
+    font-weight: normal;
+}
+
+h2, em {
+    font-size: 14px;
+    color: #060;
+    font-style: normal;
+    margin: 10px 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td {
+    border: solid 1px #ccc;
+    padding: 2px;
+}
+
+#header, #footer, .permanent_link, .order_menu, .order_stat, .main_action, .countdown, .delete_order {
+    display: none;
+}

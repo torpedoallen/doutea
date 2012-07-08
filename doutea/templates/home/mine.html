@@ -1,0 +1,20 @@
+<%inherit file="base.html"/>
+
+<%def name="content()">
+
+
+<h2>订购记录</h2>
+
+<div>
+% for orderitem in orderitems:
+<div>
+${orderitem.dish.name}
+% if orderitem.props():
+(${orderitem.props()})
+% endif
+@ ${orderitem.dish.category.vendor.name}
+</div>
+% endfor
+</div>
+
+</%def>

@@ -1,0 +1,296 @@
+<%inherit file="base.html" />
+
+<%def name="more_header()">
+<script src="/static/js/jquery.tools.min.js"></script>
+<script src="/static/js/rating_overlay.js"></script>
+<script src="/static/js/jquery.nanoscroller.min.js"></script>
+<link rel="stylesheet" href="/static/css/rating_overlay.css" media="screen"/>
+</%def>
+
+<%def name="script()">
+<script>
+$(document).ready(function() {
+
+    // 订单悬浮跟随
+    var contentPos = $(".order_content").position();
+    $(window).scroll(function(e) {
+        var y = $(this).scrollTop();
+
+        if (y > contentPos.top) {
+            $(".order_content").css({ position: 'fixed', left: ('' + contentPos.left + 'px'), top: '0px' });
+        } else {
+            $(".order_content").css({ position: '' });
+        }
+    });
+    
+    
+    $('.place_order').click(function() {
+        var dish = $(this).closest('tr'),
+        dish_id = dish.attr('dish_id'),
+        prop1 = dish.find('select[name=prop1]').val() || '',
+        prop2 = dish.find('select[name=prop2]').val() || '',
+        prop3 = dish.find('select[name=prop3]').val() || '',
+        prop4 = dish.find('select[name=prop4]').val() || '';
+
+        params = {
+            order_label: '${order.label}',
+            id: dish_id,
+            prop1: prop1,
+            prop2: prop2,
+            prop3: prop3,
+            prop4: prop4
+        };
+
+        $.post('/o${order.label}/place_order',
+            params,
+            function(data) {
+                if (data.result == 'error') {
+                    alert("下单失败: " + data.error);
+                } else {
+                    updateOrderContent();
+                }
+            }, 'json'
+        );
+    });
+
+    % if not finished:
+    $("#order_content").delegate('.delete_order_item', 'click', function() {
+        var order_item = $(this).closest('tr'),
+        order_item_id = order_item.attr('item_id');
+        $.getJSON('/o${order.label}/delete?id=' + order_item.attr('item_id'),
+            function(data) {
+                if (data.result == 'ok') {
+                    updateOrderContent();
+                } else {
+                    alert("删除失败: " + data.error);
+                }
+            });
+    });
+    % endif
+
+    var updateOrderContent = function() {
+        $.getJSON('/o${order.label}/order_content', function(data) {
+            $("#order_content").empty();
+
+            // 有数据则填充数据
+            if (data && data.total_users > 0) {
+                $("#order_content_summary").html("(" + data.total_users + "人下单，共" + data.total_items + "份，" + data.total_price + "元)");
+                for (var k in data.users) {
+                    var v = data.users[k];
+
+                    $('<tr>').append('<td><a href="' + v['home_url'] + '" target="_blank">' + k + '</a>')
+                        .append('<td align="right">&yen;' + v['total_price'] + '</td>')
+                        .append('<td></td>')
+                        .addClass('order_content_user')
+                        .appendTo("#order_content");
+
+                    for (var i in v.items) {
+                        var item = v.items[i];
+                        $('<tr>').append('<td>' + item.dish_name + (item.props ? (',' + item.props) : '') + '</td>')
+                            .append('<td class="price" align="right">&yen;' + item.price + '</td>')
+                            % if not finished:
+                            .append('<td class="delete_user">' + ((v.user_id == '${user.id}') ? '<a class="delete_order_item" href="javascript:void(0)">删除</a>' : '&nbsp;') + '</td>')
+                            % else:
+                            .append('<td>&nbsp;</td>')
+                            % endif
+                            .attr({'item_id': item.id })
+                            .addClass('order_content_item')
+                            .appendTo("#order_content");
+                    }
+                }
+
+            // 否则就显示没订单
+            } else {
+                $("#order_content_summary").html('');
+                $("<tr><td>目前还没有人预定。</td></tr>").appendTo("#order_content");
+            }
+
+        });
+    };
+
+    updateOrderContent();
+
+    $("#btn_finish").click(function() {
+        if (confirm('结束后订单将不能修改。真的要结束吗？')) {
+            location.href = $(this).attr('href');
+        }
+    });
+
+    var random_element = function(elems) {
+        if (typeof(elems) === "string") {
+            elems = $(elems);
+        }
+        var idx = Math.floor(Math.random() * elems.length);
+        return elems.eq(idx);
+    }
+
+    // 替我选吧！按钮
+    $("#btn_random").click(function() {
+        var order = random_element(".order_menu tr.dish_row");
+
+        var dish_name = order.find(".dishname").html().trim();
+        var params = order.find('select');
+        params.each(function(idx, elem) {
+            var elem = $(elem);
+            var option = random_element(elem.find("option"));
+            var val = option.val();
+            elem.val(val);
+            dish_name += ',' + val;
+        });
+
+        
+        if (confirm("豆娘为你选择了 [" + dish_name + "]。可以吗？")) {
+            order.find('.place_order').click();
+        }
+    });
+
+
+    // 浮层
+    $("#overlay").rating_overlay();
+
+    $("a.dishname").click(function() {
+        var dish_id = $(this).closest('tr').attr('dish_id');
+        $("#overlay").rating_overlay("load", dish_id, ${user.id});
+    });
+
+    // 我的评分
+    var myrating = 0;
+
+    var set_star = function(rating) {
+        var current_rating = $(".myrating").attr('rel');
+        $(".myrating").removeClass('star-' + current_rating).addClass('star-' + rating).attr({rel:rating});
+    }
+
+    $(".myrating").css({cursor:'pointer'}).mousemove(function(e) {
+        // 根据鼠标位置显示不同的星
+        var x = e.offsetX,
+        current_rating = $(this).attr('rel'),
+        rating = Math.floor(x / 15) * 2 + 2;
+        if (rating > 10) rating = 10;
+
+        if (rating != current_rating) {
+            set_star(rating);
+        }
+
+    }).mouseout(function(e) {
+        // 恢复
+        set_star(myrating);
+
+    }).click(function(e) {
+        // 保存
+        var x = e.offsetX,
+        rating = Math.floor(x / 15) * 2 + 2;
+        if (rating > 10) rating = 10;
+
+        // TODO: save
+    });
+
+});
+
+</script>
+</%def>
+
+<%def name="content()">
+
+<div id="content">
+
+<div class="order_header">
+
+% if not finished:
+<div class="main_action">
+<input type="button" id="btn_random" class="btn-l" href="javascript:void(0)" value="替我选吧！" />
+% if order.creator_id == user.id:
+<input type="button" id="btn_finish" class="btn-l" href="/o${order.label}/finish" value="结束订单" />
+% endif
+</div>
+% endif
+
+<div>
+<div class="blocktitle">${order.vendor.name}</div>
+<div class="blockinfo">电话: ${order.vendor.tel}, ${order.vendor.memo}</div>
+<div class="blockstatus blockstatus_open">
+% if not finished:
+正在开团
+% else:
+已结束
+% endif
+，
+团长<a href="${order.creator.home_url}" target="_blank">${order.creator.nickname}</a>，
+订单最大为 ${order.item_limit} 份
+</div>
+</div>
+
+
+</div>
+
+<div class="order_content">
+    <h2>当前预定<span id="order_content_summary"></span></h2>
+<table id="order_content"></table>
+</div>
+
+
+% if not finished:
+<div class="order_menu">
+<table>
+
+% for cat, sub_dishes in dishes.items():
+<tr class="category_name"><td colspan="4">${cat}</td></tr>
+
+% for dish in sub_dishes:
+<tr class="dish_row" dish_id="${dish.id}">
+
+<td><a class="dishname" href="javascript:;" rating="${dish.rating}" rating_count="${dish.rating_count}">${dish.name}</a>
+<span class="sstar sstar-${dish.rating}"></span>
+% if dish.memo:
+<span class="dishmemo">${dish.memo}</span>
+% endif
+</td>
+
+<td>
+    % for prop in dish.props():
+    <select name="${prop[0]}">
+    % for item in prop[1]:
+      <option value="${item}">${item}</option>
+    % endfor
+    </select>
+    % endfor
+</td>
+
+<td align="right">&yen; ${dish.price}</td>
+<td><input type="button" class="btn-r place_order" value="订这个" /></td>
+</tr>
+% endfor
+
+% endfor
+</table>
+
+</div>
+
+% else:
+
+<div class="order_stat">
+<%
+%>
+<h2>订单统计(共${order_stat['total_items']}份，${order_stat['total_price']}元)</h2>
+<table class="order_stat">
+% for k in sorted(order_stat['items'].keys()):
+<% v = order_stat['items'][k] %>
+<tr>
+  <td>${k}</td>
+  <td>${v['count']}</td>
+</tr>
+% endfor
+</table>
+
+</div>
+
+% endif
+
+
+<div class="clear"></div>
+
+<div id="overlay"></div>
+
+
+
+</%def>

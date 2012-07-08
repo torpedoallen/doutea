@@ -1,0 +1,18 @@
+<%inherit file="base.html" />
+
+<%def name="script()">
+<script>
+$(document).ready(function() {
+    $("input[href]").click(function() {
+        location.href = $(this).attr('href');
+    });
+});
+</script>
+</%def>
+
+<%def name="content()">
+<p>
+<em>欢迎来到${system_name}，请用你的豆瓣ID授权后登录</em>
+</p>
+<input type="button" class="btn-s" href="/do_login" value="立即授权" />
+</%def>

@@ -1,0 +1,57 @@
+<%inherit file="base.html"/>
+
+<%def name="script()">
+<script>
+$(document).ready(function() {
+    $("input[href]").click(function() {
+        location.href = $(this).attr('href');
+    });
+
+
+});
+</script>
+</%def>
+
+
+<%def name="content()">
+
+<div class="main_action">
+<input type="button" class="btn-l" href="/create_order" value="发起新订单" />
+</div>
+
+<h2>${today} 我的订单</h2>
+
+% for order in today_orders:
+<div class="block">
+<div class="blocktitle"><a href="/o${order.label}">${order.vendor.name}</a></div>
+<div class="blockinfo">${order.creator.nickname}发起于${order.create_time.isoformat()}</div>
+<div class="blockstatus ${order.finished and 'bockstatus_finished' or 'bockstatus_open'}">
+${(order.finished == 'y') and u'已结束' or u'正在开团'}
+</div>
+</div>
+% endfor
+<div class="clear"></div>
+
+<h2>三天内的订单</h2>
+
+% for order in previous_orders:
+<div class="block">
+<div class="blocktitle"><a href="/o${order.label}">${order.vendor.name}</a></div>
+<div class="blockinfo">${order.creator.nickname}发起于${order.create_time.isoformat()}</div>
+<div class="blockstatus ${order.finished and 'bockstatus_finished' or 'bockstatus_open'}">
+${(order.finished == 'y') and u'已结束' or u'正在开团'}
+</div>
+</div>
+% endfor
+<div class="clear"></div>
+
+## <h2>浏览餐厅</h2>
+## % for vendor in vendors:
+## <div class="block">
+## <div class="blocktitle"><a href="/v${vendor.id}/">${vendor.name}</a></div>
+## <div class="blockinfo">电话: ${vendor.tel} ${vendor.memo}</div>
+## </div>
+## % endfor
+## <div class="clear"></div>
+
+</%def>

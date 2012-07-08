@@ -1,0 +1,4 @@
+venv
+permdir
+*.py[c|o]
+dev.yaml

@@ -1,0 +1,43 @@
+<%inherit file="base.html"/>
+
+<%def name="content()">
+
+<h1>${vendor.name}</h1>
+
+<div>
+<div class="blockinfo">电话：${vendor.tel}</div>
+<div class="blockinfo">备注：${vendor.memo}</div>
+</div>
+
+<h2>所有餐品</h2>
+
+% for category in vendor.categories():
+
+<div class="category">
+<div class="category_name">${category.name}</div>
+% for dish in category.dishes():
+<div class="dish">
+<div class="dish_name"><a href="/d${dish.id}/">${dish.name}</a></div>
+<div class="sstar smallblock-rating sstar-${dish.rating}"> ${dish.rating} (${dish.rating_count}人评价)</div>
+</div>
+% endfor
+</div>
+<div class="clear"></div>
+% endfor
+
+
+
+<h2>评论</h2>
+
+<a href="/v${vendor.id}/add_review/">写评论</a>
+
+% for review in vendor.reviews().order_by('-update_time'):
+<div class="review">
+<div class="review_metainfo"><a href='${review.user.home_url}' target="_blank">${review.user.nickname}</a> @ ${review.update_time}</div>
+<div class="review_content">${review.content}</div>
+</div>
+
+% endfor
+
+
+</%def>

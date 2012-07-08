@@ -1,0 +1,86 @@
+<%inherit file="base.html"/>
+
+<%def name="script()">
+<script>
+$(document).ready(function() {
+    
+    var myrating = ${myrating};
+
+    var set_star = function(rating) {
+        var current_rating = $(".myrating").attr('rel');
+        $(".myrating").removeClass('star-' + current_rating).addClass('star-' + rating).attr({rel:rating});
+    }
+
+    $(".myrating").css({cursor:'pointer'}).mousemove(function(e) {
+        // 根据鼠标位置显示不同的星
+        var x = e.offsetX,
+        current_rating = $(this).attr('rel'),
+        rating = Math.floor(x / 15) * 2 + 2;
+        if (rating > 10) rating = 10;
+
+        if (rating != current_rating) {
+            set_star(rating);
+        }
+
+    }).mouseout(function(e) {
+        // 恢复
+        set_star(myrating);
+
+    }).click(function(e) {
+        // 保存
+        var x = e.offsetX,
+        rating = Math.floor(x / 15) * 2 + 2;
+        if (rating > 10) rating = 10;
+
+        $.post('/d${dish.id}/rate?rating=' + rating, function(data) {
+            if (data.result == 'ok') {
+                myrating = rating;
+            }
+            set_star(myrating);
+        }, 'json');
+
+        // TODO: save
+    });
+
+});
+</script>
+</%def>
+
+<%def name="content()">
+
+<h1>${dish.name} (${dish.category.dish_name})</h1>
+
+<div class="subject_info">
+<div class="blockinfo">餐厅：<a href="/v${dish.category.vendor.id}/">${dish.category.vendor.name}</a></div>
+<div class="blockinfo">分类：${dish.category.name}</div>
+<div class="blockinfo">价格：&yen;${dish.price}</div>
+% if dish.memo:
+<div class="blockinfo">${dish.memo}</div>
+% endif
+</div>
+
+<div class="subject_rating">
+<div class="rating star star-${dish.rating}"> ${dish.rating}</div>
+<div class="rating_count">${dish.rating_count}人评价</div>
+</div>
+
+<div class="clear"></div>
+
+<div class="add_rating">
+评价： <div class="myrating star star-${myrating}" rel="${myrating}"></div>
+<span class="rating-desc"></span>
+</div>
+
+<h2>评论</h2>
+
+<a href="/d${dish.id}/add_review/">写评论</a>
+
+% for review in dish.reviews().order_by('-update_time'):
+<div class="review">
+<div class="review_metainfo"><a href='${review.user.home_url}' target="_blank">${review.user.nickname}</a> @ ${review.update_time}</div>
+<div class="review_content">${review.content}</div>
+</div>
+
+% endfor
+
+</%def>

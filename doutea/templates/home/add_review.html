@@ -1,0 +1,31 @@
+<%!
+from doutea.home.models import VENDOR_CAT_ID, DISH_CAT_ID
+%>
+<%inherit file="base.html"/>
+
+<%def name="content()">
+
+<h1>撰写评论</h1>
+
+<div class="review_desc">
+评论${(cat_id == VENDOR_CAT_ID) and u'商家' or subject.category.dish_name}: ${subject.name}
+</div>
+
+% if error:
+<div class="error">${error}</div>
+% endif
+<form method="POST">
+
+<div class="row">
+<textarea cols="80" rows="10" name="content">
+</textarea>
+</div>
+
+<div class="row">
+<input type="submit" name="save" value="保存">
+<a href="/${(cat_id == VENDOR_CAT_ID) and 'v' or 'd'}${subject.id}/">不写了，返回</a>
+</div>
+
+</form>
+
+</%def>
